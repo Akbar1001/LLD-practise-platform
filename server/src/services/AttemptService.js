@@ -5,6 +5,8 @@ const {
     ATTEMPT_STATUS
 } = require("../domain/Attempt");
 
+const Submission = require("../domain/Submission");
+
 class AttemptService {
     constructor(attemptRepository, problemRepository) {
         this.attemptRepository = attemptRepository;
@@ -96,16 +98,31 @@ class AttemptService {
     }
 
     toDomain(attemptData) {
-        return new Attempt({
-            id: attemptData._id.toString(),
-            userId: attemptData.userId,
-            problemId:
-                attemptData.problemId?._id?.toString() ||
-                attemptData.problemId?.toString(),
-            submission: attemptData.submission,
-            status: attemptData.status
+    let submission = null;
+
+    if (attemptData.submission) {
+        submission = new Submission({
+            classesAndResponsibilities:
+                attemptData.submission.classesAndResponsibilities,
+            relationships:
+                attemptData.submission.relationships,
+            designDecisions:
+                attemptData.submission.designDecisions,
+            edgeCases:
+                attemptData.submission.edgeCases
         });
-    }
+    } 
+
+    return new Attempt({
+        id: attemptData._id.toString(),
+        userId: attemptData.userId,
+        problemId:
+            attemptData.problemId?._id?.toString() ||
+            attemptData.problemId?.toString(),
+        submission,
+        status: attemptData.status
+    });
+}
 }
 
 module.exports = AttemptService;
