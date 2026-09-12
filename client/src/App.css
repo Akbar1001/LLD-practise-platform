@@ -200,3 +200,182 @@
         font-size: 34px;
     }
 }
+
+/* ================================
+   Practice Workspace
+================================ */
+
+.practice-page {
+    max-width: 1250px;
+}
+
+.practice-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+.sticky-panel {
+    position: sticky;
+    top: 24px;
+}
+
+.problem-panel h1 {
+    margin: 14px 0;
+    font-size: 32px;
+    line-height: 1.2;
+}
+
+.problem-description {
+    color: #626873;
+    line-height: 1.7;
+}
+
+.problem-panel .problem-section {
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.problem-panel .problem-section h2 {
+    font-size: 17px;
+}
+
+.submission-header {
+    margin-bottom: 24px;
+}
+
+.submission-header h2 {
+    margin: 0 0 8px;
+    font-size: 30px;
+}
+
+.submission-header p:last-child {
+    color: #626873;
+}
+
+.editor-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.editor-section {
+    padding: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.editor-section label {
+    display: block;
+    margin-bottom: 12px;
+}
+
+.editor-section label span {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.editor-section label small {
+    display: block;
+    color: #737984;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.editor-section textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 14px;
+
+    resize: vertical;
+
+    border: 1px solid #d9dce2;
+    border-radius: 8px;
+
+    outline: none;
+
+    color: #17181c;
+    background: #fafafa;
+
+    line-height: 1.6;
+}
+
+.editor-section textarea:focus {
+    border-color: #6366f1;
+    background: white;
+}
+
+.editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    padding: 20px 24px;
+}
+
+.primary-button,
+.secondary-button {
+    padding: 11px 18px;
+
+    border-radius: 8px;
+
+    font-weight: 600;
+}
+
+.primary-button {
+    border: none;
+    background: #17181c;
+    color: white;
+}
+
+.primary-button:hover {
+    background: #303238;
+}
+
+.secondary-button {
+    border: 1px solid #d9dce2;
+    background: white;
+    color: #303238;
+}
+
+.secondary-button:hover {
+    background: #f6f7f9;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+    .practice-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sticky-panel {
+        position: static;
+    }
+
+    .problem-panel {
+        order: 1;
+    }
+
+    .submission-panel {
+        order: 2;
+    }
+}
+
+@media (max-width: 600px) {
+    .editor-actions {
+        flex-direction: column;
+    }
+
+    .primary-button,
+    .secondary-button {
+        width: 100%;
+    }
+}
