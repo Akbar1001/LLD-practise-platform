@@ -8,10 +8,15 @@ const {
 const Submission = require("../domain/Submission");
 
 class AttemptService {
-    constructor(attemptRepository, problemRepository) {
-        this.attemptRepository = attemptRepository;
-        this.problemRepository = problemRepository;
-    }
+    constructor(
+    attemptRepository,
+    problemRepository,
+    evaluationService
+) {
+    this.attemptRepository = attemptRepository;
+    this.problemRepository = problemRepository;
+    this.evaluationService = evaluationService;
+}
 
     async createAttempt({ userId, problemId }) {
         if (!mongoose.isValidObjectId(problemId)) {
@@ -79,23 +84,43 @@ class AttemptService {
     }
 
     async submitAttempt({
+    attemptId,
+    userId
+}) {
+    const attemptData = await this.getAttemptById({
         attemptId,
         userId
-    }) {
-        const attemptData = await this.getAttemptById({
-            attemptId,
-            userId
-        });
+    });
 
-        const attempt = this.toDomain(attemptData);
+    const attempt = this.toDomain(attemptData);
 
-        attempt.submit();
+    attempt.submit();
 
-        return this.attemptRepository.updateStatus(
-            attemptId,
-            attempt.status
-        );
-    }
+    await this.attemptRepository.updateStatus(
+        attemptId,
+        attempt.status
+    );
+
+    // Start evaluation without making the HTTP request
+    // wait for the evaluator to finish.
+    setImmediate(async () => {
+        try {
+            await this.evaluationService.evaluateAttempt(
+                attemptId
+            );
+        } catch (error) {
+            console.error(
+                `Evaluation failed for attempt ${attemptId}:`,
+                error.message
+            );
+        }
+    });
+
+    return {
+        ...attemptData,
+        status: attempt.status
+    };
+}
 
     toDomain(attemptData) {
     let submission = null;
