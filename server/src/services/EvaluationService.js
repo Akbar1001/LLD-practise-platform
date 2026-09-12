@@ -2,6 +2,9 @@ const {
     Attempt
 } = require("../domain/Attempt");
 
+const Submission =
+    require("../domain/Submission");
+
 class EvaluationService {
     constructor(
         attemptRepository,
@@ -9,18 +12,29 @@ class EvaluationService {
         evaluationRepository,
         evaluator
     ) {
-        this.attemptRepository = attemptRepository;
-        this.problemRepository = problemRepository;
-        this.evaluationRepository = evaluationRepository;
-        this.evaluator = evaluator;
+        this.attemptRepository =
+            attemptRepository;
+
+        this.problemRepository =
+            problemRepository;
+
+        this.evaluationRepository =
+            evaluationRepository;
+
+        this.evaluator =
+            evaluator;
     }
 
     async evaluateAttempt(attemptId) {
         const attemptData =
-            await this.attemptRepository.findById(attemptId);
+            await this.attemptRepository.findById(
+                attemptId
+            );
 
         if (!attemptData) {
-            throw new Error("Attempt not found");
+            throw new Error(
+                "Attempt not found"
+            );
         }
 
         const attempt =
@@ -32,7 +46,9 @@ class EvaluationService {
             );
 
         if (!problem) {
-            throw new Error("Problem not found");
+            throw new Error(
+                "Problem not found"
+            );
         }
 
         attempt.startEvaluation();
@@ -54,11 +70,19 @@ class EvaluationService {
 
             await this.evaluationRepository.create({
                 attemptId,
+
                 status: "COMPLETED",
+
                 overallScore,
-                criteria: evaluation.criteria,
-                strengths: evaluation.strengths,
-                improvements: evaluation.improvements
+
+                criteria:
+                    evaluation.criteria,
+
+                strengths:
+                    evaluation.strengths,
+
+                improvements:
+                    evaluation.improvements
             });
 
             attempt.completeEvaluation();
@@ -79,8 +103,11 @@ class EvaluationService {
 
             await this.evaluationRepository.create({
                 attemptId,
+
                 status: "FAILED",
-                errorMessage: error.message
+
+                errorMessage:
+                    error.message
             });
 
             throw error;
@@ -88,31 +115,44 @@ class EvaluationService {
     }
 
     toDomain(attemptData) {
-        const Submission = require("../domain/Submission");
-
         let submission = null;
 
         if (attemptData.submission) {
-            submission = new Submission({
-                classesAndResponsibilities:
-                    attemptData.submission.classesAndResponsibilities,
-                relationships:
-                    attemptData.submission.relationships,
-                designDecisions:
-                    attemptData.submission.designDecisions,
-                edgeCases:
-                    attemptData.submission.edgeCases
-            });
+            submission =
+                new Submission({
+                    classesAndResponsibilities:
+                        attemptData.submission
+                            .classesAndResponsibilities,
+
+                    relationships:
+                        attemptData.submission
+                            .relationships,
+
+                    designDecisions:
+                        attemptData.submission
+                            .designDecisions,
+
+                    edgeCases:
+                        attemptData.submission
+                            .edgeCases
+                });
         }
 
         return new Attempt({
-            id: attemptData._id.toString(),
-            userId: attemptData.userId,
+            id:
+                attemptData._id.toString(),
+
+            userId:
+                attemptData.userId,
+
             problemId:
                 attemptData.problemId?._id?.toString() ||
                 attemptData.problemId?.toString(),
+
             submission,
-            status: attemptData.status
+
+            status:
+                attemptData.status
         });
     }
 }

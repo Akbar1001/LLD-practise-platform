@@ -1,22 +1,21 @@
 const mongoose = require("mongoose");
 
 const {
-    Attempt,
-    ATTEMPT_STATUS
+    Attempt
 } = require("../domain/Attempt");
 
 const Submission = require("../domain/Submission");
 
 class AttemptService {
     constructor(
-    attemptRepository,
-    problemRepository,
-    evaluationService
-) {
-    this.attemptRepository = attemptRepository;
-    this.problemRepository = problemRepository;
-    this.evaluationService = evaluationService;
-}
+        attemptRepository,
+        problemRepository,
+        evaluationService
+    ) {
+        this.attemptRepository = attemptRepository;
+        this.problemRepository = problemRepository;
+        this.evaluationService = evaluationService;
+    }
 
     async createAttempt({ userId, problemId }) {
         if (!mongoose.isValidObjectId(problemId)) {
@@ -25,7 +24,8 @@ class AttemptService {
             throw error;
         }
 
-        const problem = await this.problemRepository.findById(problemId);
+        const problem =
+            await this.problemRepository.findById(problemId);
 
         if (!problem) {
             const error = new Error("Problem not found");
@@ -39,6 +39,10 @@ class AttemptService {
         });
     }
 
+    async getAttempts(userId) {
+        return this.attemptRepository.findByUserId(userId);
+    }
+
     async getAttemptById({ attemptId, userId }) {
         if (!mongoose.isValidObjectId(attemptId)) {
             const error = new Error("Invalid attempt ID");
@@ -46,7 +50,8 @@ class AttemptService {
             throw error;
         }
 
-        const attempt = await this.attemptRepository.findById(attemptId);
+        const attempt =
+            await this.attemptRepository.findById(attemptId);
 
         if (!attempt) {
             const error = new Error("Attempt not found");
@@ -55,7 +60,10 @@ class AttemptService {
         }
 
         if (attempt.userId !== userId) {
-            const error = new Error("You do not have access to this attempt");
+            const error = new Error(
+                "You do not have access to this attempt"
+            );
+
             error.statusCode = 403;
             throw error;
         }
@@ -68,12 +76,14 @@ class AttemptService {
         userId,
         submissionData
     }) {
-        const attemptData = await this.getAttemptById({
-            attemptId,
-            userId
-        });
+        const attemptData =
+            await this.getAttemptById({
+                attemptId,
+                userId
+            });
 
-        const attempt = this.toDomain(attemptData);
+        const attempt =
+            this.toDomain(attemptData);
 
         attempt.saveSubmission(submissionData);
 
@@ -84,70 +94,86 @@ class AttemptService {
     }
 
     async submitAttempt({
-    attemptId,
-    userId
-}) {
-    const attemptData = await this.getAttemptById({
         attemptId,
         userId
-    });
+    }) {
+        const attemptData =
+            await this.getAttemptById({
+                attemptId,
+                userId
+            });
 
-    const attempt = this.toDomain(attemptData);
+        const attempt =
+            this.toDomain(attemptData);
 
-    attempt.submit();
+        attempt.submit();
 
-    await this.attemptRepository.updateStatus(
-        attemptId,
-        attempt.status
-    );
+        await this.attemptRepository.updateStatus(
+            attemptId,
+            attempt.status
+        );
 
-    // Start evaluation without making the HTTP request
-    // wait for the evaluator to finish.
-    setImmediate(async () => {
-        try {
-            await this.evaluationService.evaluateAttempt(
-                attemptId
-            );
-        } catch (error) {
-            console.error(
-                `Evaluation failed for attempt ${attemptId}:`,
-                error.message
-            );
-        }
-    });
+        /*
+         * Start evaluation asynchronously.
+         *
+         * We intentionally don't await this because the
+         * HTTP request should not be blocked by evaluation.
+         */
+        setImmediate(async () => {
+            try {
+                await this.evaluationService.evaluateAttempt(
+                    attemptId
+                );
+            } catch (error) {
+                console.error(
+                    `Evaluation failed for attempt ${attemptId}:`,
+                    error.message
+                );
+            }
+        });
 
-    return {
-        ...attemptData,
-        status: attempt.status
-    };
-}
+        return {
+            ...attemptData,
+            status: attempt.status
+        };
+    }
 
     toDomain(attemptData) {
-    let submission = null;
+        let submission = null;
 
-    if (attemptData.submission) {
-        submission = new Submission({
-            classesAndResponsibilities:
-                attemptData.submission.classesAndResponsibilities,
-            relationships:
-                attemptData.submission.relationships,
-            designDecisions:
-                attemptData.submission.designDecisions,
-            edgeCases:
-                attemptData.submission.edgeCases
+        if (attemptData.submission) {
+            submission = new Submission({
+                classesAndResponsibilities:
+                    attemptData.submission
+                        .classesAndResponsibilities,
+
+                relationships:
+                    attemptData.submission.relationships,
+
+                designDecisions:
+                    attemptData.submission.designDecisions,
+
+                edgeCases:
+                    attemptData.submission.edgeCases
+            });
+        }
+
+        return new Attempt({
+            id: attemptData._id.toString(),
+
+            userId:
+                attemptData.userId,
+
+            problemId:
+                attemptData.problemId?._id?.toString() ||
+                attemptData.problemId?.toString(),
+
+            submission,
+
+            status:
+                attemptData.status
         });
-    } 
-
-    return new Attempt({
-        id: attemptData._id.toString(),
-        userId: attemptData.userId,
-        problemId:
-            attemptData.problemId?._id?.toString() ||
-            attemptData.problemId?.toString(),
-        submission,
-        status: attemptData.status
-    });
-}
+    }
 }
 
 module.exports = AttemptService;

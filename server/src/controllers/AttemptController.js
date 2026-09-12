@@ -5,20 +5,25 @@ class AttemptController {
 
     createAttempt = async (req, res, next) => {
         try {
-            const userId = req.headers["x-user-id"] || "demo-user";
+            const userId =
+                req.headers["x-user-id"] || "demo-user";
 
             const { problemId } = req.body;
 
             if (!problemId) {
-                const error = new Error("problemId is required");
+                const error =
+                    new Error("problemId is required");
+
                 error.statusCode = 400;
+
                 throw error;
             }
 
-            const attempt = await this.attemptService.createAttempt({
-                userId,
-                problemId
-            });
+            const attempt =
+                await this.attemptService.createAttempt({
+                    userId,
+                    problemId
+                });
 
             res.status(201).json({
                 success: true,
@@ -29,14 +34,35 @@ class AttemptController {
         }
     };
 
+    getAttempts = async (req, res, next) => {
+        try {
+            const userId =
+                req.headers["x-user-id"] || "demo-user";
+
+            const attempts =
+                await this.attemptService.getAttempts(
+                    userId
+                );
+
+            res.json({
+                success: true,
+                data: attempts
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
+
     getAttemptById = async (req, res, next) => {
         try {
-            const userId = req.headers["x-user-id"] || "demo-user";
+            const userId =
+                req.headers["x-user-id"] || "demo-user";
 
-            const attempt = await this.attemptService.getAttemptById({
-                attemptId: req.params.id,
-                userId
-            });
+            const attempt =
+                await this.attemptService.getAttemptById({
+                    attemptId: req.params.id,
+                    userId
+                });
 
             res.json({
                 success: true,
@@ -49,7 +75,8 @@ class AttemptController {
 
     saveSubmission = async (req, res, next) => {
         try {
-            const userId = req.headers["x-user-id"] || "demo-user";
+            const userId =
+                req.headers["x-user-id"] || "demo-user";
 
             const {
                 classesAndResponsibilities,
@@ -58,16 +85,18 @@ class AttemptController {
                 edgeCases
             } = req.body;
 
-            const attempt = await this.attemptService.saveSubmission({
-                attemptId: req.params.id,
-                userId,
-                submissionData: {
-                    classesAndResponsibilities,
-                    relationships,
-                    designDecisions,
-                    edgeCases
-                }
-            });
+            const attempt =
+                await this.attemptService.saveSubmission({
+                    attemptId: req.params.id,
+                    userId,
+
+                    submissionData: {
+                        classesAndResponsibilities,
+                        relationships,
+                        designDecisions,
+                        edgeCases
+                    }
+                });
 
             res.json({
                 success: true,
@@ -80,12 +109,14 @@ class AttemptController {
 
     submitAttempt = async (req, res, next) => {
         try {
-            const userId = req.headers["x-user-id"] || "demo-user";
+            const userId =
+                req.headers["x-user-id"] || "demo-user";
 
-            const attempt = await this.attemptService.submitAttempt({
-                attemptId: req.params.id,
-                userId
-            });
+            const attempt =
+                await this.attemptService.submitAttempt({
+                    attemptId: req.params.id,
+                    userId
+                });
 
             res.json({
                 success: true,

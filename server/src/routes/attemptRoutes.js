@@ -1,51 +1,96 @@
 const express = require("express");
 
-const AttemptRepository = require("../repositories/AttemptRepository");
-const ProblemRepository = require("../repositories/ProblemRepository");
-const EvaluationRepository = require("../repositories/EvaluationRepository");
+const AttemptRepository =
+    require("../repositories/AttemptRepository");
 
-const AttemptService = require("../services/AttemptService");
-const EvaluationService = require("../services/EvaluationService");
+const ProblemRepository =
+    require("../repositories/ProblemRepository");
 
-const AttemptController = require("../controllers/AttemptController");
+const EvaluationRepository =
+    require("../repositories/EvaluationRepository");
 
-const RuleBasedEvaluator =require("../evaluators/RuleBasedEvaluator");
+const AttemptService =
+    require("../services/AttemptService");
 
-const EvaluationController =require("../controllers/EvaluationController");
+const EvaluationService =
+    require("../services/EvaluationService");
 
+const AttemptController =
+    require("../controllers/AttemptController");
+
+const EvaluationController =
+    require("../controllers/EvaluationController");
+
+const RuleBasedEvaluator =
+    require("../evaluators/RuleBasedEvaluator");
 
 const router = express.Router();
 
 
+// Repositories
+const attemptRepository =
+    new AttemptRepository();
 
-const attemptRepository = new AttemptRepository();
-const problemRepository = new ProblemRepository();
-const evaluationRepository = new EvaluationRepository();
+const problemRepository =
+    new ProblemRepository();
 
-const evaluator = new RuleBasedEvaluator();
+const evaluationRepository =
+    new EvaluationRepository();
 
-const evaluationService = new EvaluationService(
-    attemptRepository,
-    problemRepository,
-    evaluationRepository,
-    evaluator
-);
 
-const attemptService = new AttemptService(
-    attemptRepository,
-    problemRepository,
-    evaluationService
-);
+// Evaluator
+const evaluator =
+    new RuleBasedEvaluator();
 
+
+// Evaluation Service
+const evaluationService =
+    new EvaluationService(
+        attemptRepository,
+        problemRepository,
+        evaluationRepository,
+        evaluator
+    );
+
+
+// Attempt Service
+const attemptService =
+    new AttemptService(
+        attemptRepository,
+        problemRepository,
+        evaluationService
+    );
+
+
+// Controllers
 const attemptController =
-    new AttemptController(attemptService);
+    new AttemptController(
+        attemptService
+    );
 
 const evaluationController =
-    new EvaluationController(evaluationRepository);
+    new EvaluationController(
+        evaluationRepository,
+        attemptRepository
+    );
 
-router.post("/", attemptController.createAttempt);
 
-router.get("/:id", attemptController.getAttemptById);
+// Routes
+
+router.post(
+    "/",
+    attemptController.createAttempt
+);
+
+router.get(
+    "/",
+    attemptController.getAttempts
+);
+
+router.get(
+    "/:id",
+    attemptController.getAttemptById
+);
 
 router.put(
     "/:id/submission",
