@@ -4,6 +4,9 @@ require("dotenv").config();
 
 const connectDatabase = require("./config/database");
 const problemRoutes = require("./routes/problemRoutes");
+const attemptRoutes = require("./routes/attemptRoutes");
+
+
 const errorHandler = require("./middleware/errorHandler");
 
 
@@ -22,6 +25,10 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/problems", problemRoutes);
+app.use("/api/problems", problemRoutes);
+app.use("/api/attempts", attemptRoutes);
+
+
 
 app.use(errorHandler);
 
